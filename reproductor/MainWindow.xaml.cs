@@ -38,6 +38,8 @@ namespace reproductor
         //Exclusivo para salida
         WaveOut output;
 
+        bool dragging = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -54,6 +56,12 @@ namespace reproductor
         private void Timer_Tick(object sender, EventArgs e)
         {
             lblTiempoActual.Text = reader.CurrentTime.ToString().Substring(0, 8);
+
+            if(!dragging)
+            {
+                sldTiempo.Value = reader.CurrentTime.TotalSeconds;
+            }
+            
 
             
         }
@@ -117,6 +125,9 @@ namespace reproductor
                     lblTiempoTotal.Text = reader.TotalTime.ToString().Substring(0, 8);
                     lblTiempoActual.Text = reader.CurrentTime.ToString().Substring(0, 8);
 
+                    sldTiempo.Maximum = reader.TotalTime.TotalSeconds;
+                    sldTiempo.Value = reader.CurrentTime.TotalSeconds;
+
                     timer.Start();
                 }
             }
@@ -153,6 +164,22 @@ namespace reproductor
                 btnRerpoducir.IsEnabled = true;
                 btnPausa.IsEnabled = false;
                 btnDetener.IsEnabled = true;
+            }
+        }
+
+        private void SldTiempo_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+        {
+            dragging = true;
+
+        }
+
+        private void SldTiempo_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+            dragging = false;
+
+            if(reader != null && output != null && output.PlaybackState != PlaybackState.Stopped)
+            {
+                reader.CurrentTime = TimeSpan.FromSeconds(sldTiempo.Value);
             }
         }
     }
